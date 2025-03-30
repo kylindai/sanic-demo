@@ -1,0 +1,1 @@
+from .biz_model import UserInfo

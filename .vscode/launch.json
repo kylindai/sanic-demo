@@ -1,0 +1,13 @@
+{
+    "configurations": [
+        {
+            "name": "ctp-web app_wss",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/ctp-web.py",
+            "args": [],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+    ]
+}
