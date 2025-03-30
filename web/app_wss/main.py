@@ -1,44 +1,44 @@
-from sanic import Sanic, Request, response
-from sanic.log import logger
-from sanic.response.types import JSONResponse
+import os
+import sys
 
+from sanic import Sanic
+from sanic.log import logger
+
+from comm.conf.db_conf import Config as db_config
+
+from web.app.comm import db
+from web.app.utils import init_app
 from web.app_wss.app.bp import tester
 
 
 def create_app() -> Sanic:
     app = Sanic("APP_WSS")
 
+    app.config.BASE_DIR = os.path.dirname(__file__)
+    init_app(app)
+
     app.register_listener(main_start, "main_process_start")
+    app.register_listener(setup_env, "before_server_start")
     app.register_listener(setup_db, "before_server_start")
 
     # app.register_middleware(convert_to_json, "response")
 
-    app.static('/static/', 'static')
-    app.blueprint(tester.bp)
-
-    # app.config.JSON_AS_ASCII = False
-
-    # @app.on_response
-    # async def example(request, response):
-    #     print("I execute after the handler.")
-    
-    
     return app
 
 
-async def main_start(*_):
+async def main_start(app):
     logger.debug("main_start ...")
 
 
-async def setup_db(*_):
+async def setup_env(app):
+    logger.info("setup_env")
+
+
+
+async def setup_db(app):
     logger.info("setup_db ...")
 
+    app.config.DB_CONFIG = db_config
+    db.init_app(app)
 
-async def convert_to_json(request, resp):
-    logger.info("convert_to_json ...")
-    if isinstance(resp, JSONResponse):
-        return response.json(
-            resp.raw_body,
-            ensure_ascii=False,
-            status=getattr(resp, "status", 200)
-        )
+    app.blueprint(tester.bp)
