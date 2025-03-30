@@ -28,8 +28,8 @@ def db_session(request) -> AsyncSession:
         return request.app.ctx.db_session()
 
 
-def build_json(resp: dict) -> JSONResponse:
-    if resp:
-        return json(resp, indent=4, sort_keys=False, ensure_ascii=False)
+def build_json(result: dict) -> JSONResponse:
+    if result:
+        return json(result, indent=4, sort_keys=False, ensure_ascii=False)
     else:
         return json({})

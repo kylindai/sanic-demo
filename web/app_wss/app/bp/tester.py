@@ -45,6 +45,4 @@ async def setting(request, id:int):
         result = await session.execute(stmt)
         system_conf = result.scalar()
 
-    if not system_conf:
-        return json({})
     return build_json(system_conf.to_dict())
