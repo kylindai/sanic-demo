@@ -6,9 +6,11 @@ from sanic.log import logger
 
 from comm.conf.db_conf import Config as db_config
 
-from web.app.comm import db
+from web.app.comm import db, scheduler
 from web.app.utils import init_app
 from web.app_wss.app.bp import tester
+
+from web.app_wss.conf.job_conf import Config as job_config
 
 
 def create_app() -> Sanic:
@@ -19,7 +21,6 @@ def create_app() -> Sanic:
 
     app.register_listener(main_start, "main_process_start")
     app.register_listener(setup_env, "before_server_start")
-    app.register_listener(setup_db, "before_server_start")
 
     # app.register_middleware(convert_to_json, "response")
 
@@ -31,14 +32,11 @@ async def main_start(app):
 
 
 async def setup_env(app):
-    logger.info("setup_env")
-
-
-
-async def setup_db(app):
-    logger.info("setup_db ...")
+    logger.info("setup_env ...")
 
     app.config.DB_CONFIG = db_config
     db.init_app(app)
+
+    app.config.JOB_CONFIG = job_config
 
     app.blueprint(tester.bp)
