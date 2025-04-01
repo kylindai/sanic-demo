@@ -1,6 +1,6 @@
 
 from .sanic_sqlalchemy import SQLAlchemy
-from .sanic_scheduler import Scheduler
+from .sanic_apscheduler import APScheduler
 
 db = SQLAlchemy()
-scheduler = Scheduler()
+scheduler = APScheduler()
