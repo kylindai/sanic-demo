@@ -11,6 +11,8 @@ from web.app.utils import init_app
 from web.app_wss.app.bp import tester
 from web.app_wss.conf.job_conf import Config as job_config 
 
+from web.app_wss.conf.job_conf import Config as job_config
+
 
 def create_app() -> Sanic:
     app = Sanic("APP_WSS")

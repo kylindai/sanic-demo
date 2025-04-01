@@ -24,11 +24,14 @@ class Scheduler:
         self._scheduler.start()
 
     def start(self, app):
-        app.register_listener(self._connect_db, "after_server_start")
+        # app.register_listener(self._connect_db, "after_server_start")
+        pass
 
     def shutdown(self):
-        self._scheduler.shutdown()
+        # self._scheduler.shutdown()
+        pass
 
     def add_job(self, *args, **kwargs):
         self._scheduler.add_job(*args, **kwargs)
 
+    
