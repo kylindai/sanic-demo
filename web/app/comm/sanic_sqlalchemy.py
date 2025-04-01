@@ -80,12 +80,12 @@ class SQLAlchemy:
                 # app.register_middleware(self._close_session, "response")
                 # logger.debug("register middleware session ok")
 
-    async def _connect_db(self, app):
+    async def _connect_db(self, app, loop):
         if app.ctx.db_engine:
             # await app.ctx.db_engine.connect()
             logger.info("db connected")
 
-    async def _disconnect_db(self, app):
+    async def _disconnect_db(self, app, loop):
         if app.ctx.db_engine:
             await app.ctx.db_engine.dispose()
             logger.info("db disconnected")
