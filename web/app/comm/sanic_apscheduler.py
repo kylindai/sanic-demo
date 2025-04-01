@@ -113,7 +113,7 @@ class APScheduler:
                 for job in jobs:
                     if not self._scheduler.get_job(job.get('id')):
                         self.add_job(**job)
-                return True
+            return True
 
     def _fix_job_def(self, job_def):
         """
