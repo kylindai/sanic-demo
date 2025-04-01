@@ -25,25 +25,16 @@ class APScheduler:
         self._scheduler = scheduler or AsyncIOScheduler()
         self._app = None
 
+    @property
+    def app(self) -> Sanic:
+        return self._app
+
     def init_app(self, app: Sanic):
         # logger.debug(app.config.JOB_CONFIG)
         if self._load_config(app) and self._load_job(app):
             self._app = app
-            app.register_listener(self.start, "after_server_start")
-            app.register_listener(self.shutdown, "before_server_stop")
-
-    def start(self, app, loop):
-        if self._app:
-            self._scheduler.start()
-            logger.info("scheduler started")
-
-    def shutdown(self, app, loop):
-        if self._app:
-            self._scheduler.shutdown()
-            logger.info("scheduler shutdown")
-
-    def configure(self, job_config):
-        self._load_config(job_config)
+            app.register_listener(self._start, "after_server_start")
+            app.register_listener(self._shutdown, "before_server_stop")
 
     def add_job(self, id, func, **kwargs):
         job_def = dict(kwargs)
@@ -78,10 +69,10 @@ class APScheduler:
             'max_instances': 3
         }
         timezone = 'Asia/Shanghai'
-        self._scheduler.configure(#jobstores=jobstores,
-                                  executors=executors,
-                                  job_defaults=job_defaults,
-                                  timezone=timezone)
+        self._scheduler.configure(  # jobstores=jobstores,
+            executors=executors,
+            job_defaults=job_defaults,
+            timezone=timezone)
         """
         options = dict()
         # jobstores
@@ -133,3 +124,11 @@ class APScheduler:
             trigger = job_def.pop("trigger")
             job_def["trigger"] = trigger.pop("type", "date")
             job_def.update(trigger)
+
+    def _start(self, app, loop):
+        self._scheduler.start()
+        logger.info("scheduler started")
+
+    def _shutdown(self, app, loop):
+        self._scheduler.shutdown()
+        logger.info("scheduler shutdown")

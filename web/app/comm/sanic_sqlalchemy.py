@@ -34,6 +34,29 @@ class SQLAlchemy:
 
     def __init__(self):
         self._session_ctx = None
+        self._app = None
+
+    @property
+    def app(self) -> Sanic:
+        return self._app
+
+    def init_app(self, app: Sanic):
+        # logger.error(app.config.DB_CONFIG)
+        db_engine = self._create_engine(app.config.DB_CONFIG)
+        if db_engine:
+            self._app = app
+            # register listener engine
+            app.ctx.db_engine = db_engine
+            app.register_listener(self._connect_db, "after_server_start")
+            app.register_listener(self._disconnect_db, "before_server_stop")
+            # logger.debug("register listener db_engine ok")
+
+            app.ctx.db_session = self._session_maker
+
+            # register middleware session
+            # app.register_middleware(self._inject_session, "request")
+            # app.register_middleware(self._close_session, "response")
+            # logger.debug("register middleware session ok")
 
     def _get_db_url(self, db_config) -> str:
         if db_config and 'host' in db_config and 'port' in db_config \
@@ -60,23 +83,6 @@ class SQLAlchemy:
                 engine, expire_on_commit=False)
             self._session_ctx = ContextVar("db_session")
             return engine
-
-    def init_app(self, app: Sanic):
-        # logger.error(app.config.DB_CONFIG)
-        db_engine = self._create_engine(app.config.DB_CONFIG)
-        if db_engine:
-            # register listener engine
-            app.ctx.db_engine = db_engine
-            app.register_listener(self._connect_db, "after_server_start")
-            app.register_listener(self._disconnect_db, "before_server_stop")
-            # logger.debug("register listener db_engine ok")
-
-            app.ctx.db_session = self._session_maker
-
-            # register middleware session
-            # app.register_middleware(self._inject_session, "request")
-            # app.register_middleware(self._close_session, "response")
-            # logger.debug("register middleware session ok")
 
     async def _connect_db(self, app, loop):
         if app.ctx.db_engine:
