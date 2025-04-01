@@ -10,6 +10,7 @@ from sanic import Sanic
 from sanic.log import logger
 
 from contextvars import ContextVar
+
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.base import BaseTrigger
@@ -24,15 +25,17 @@ class APScheduler:
     def __init__(self, scheduler=None):
         self._scheduler = scheduler or AsyncIOScheduler()
         self._app = None
+        self._app_context = ContextVar("app_context_apscheduler")
 
     @property
     def app(self) -> Sanic:
-        return self._app
+        return self._app #_context.get()
 
     def init_app(self, app: Sanic):
         # logger.debug(app.config.JOB_CONFIG)
         if self._load_config(app) and self._load_job(app):
             self._app = app
+            self._app_context.set(app)
             app.register_listener(self._start, "after_server_start")
             app.register_listener(self._shutdown, "before_server_stop")
 
