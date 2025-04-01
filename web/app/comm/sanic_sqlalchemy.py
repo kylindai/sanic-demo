@@ -58,6 +58,9 @@ class SQLAlchemy:
             # app.register_middleware(self._close_session, "response")
             # logger.debug("register middleware session ok")
 
+    def session(self) -> AsyncSession:
+        return self._session_maker()
+
     def _get_db_url(self, db_config) -> str:
         if db_config and 'host' in db_config and 'port' in db_config \
                 and 'username' in db_config and 'password' in db_config \

@@ -50,7 +50,6 @@ class APScheduler:
 
     def _load_config(self, app):
         """
-        Load the configuration from the Flask configuration.
         """
         if not app.config.JOB_CONFIG:
             return False

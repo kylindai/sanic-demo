@@ -6,6 +6,7 @@ from sqlalchemy import select
 
 from comm.biz import UserInfo
 
+from web.app.comm import db, scheduler
 from web.app.utils import db_session, build_json
 from web.app_wss.app.biz.biz_model import SystemConf
 
@@ -41,6 +42,16 @@ async def foo(request):
 @bp.get("/setting/<id:int>")
 async def setting(request, id:int):
     async with db_session(request) as session:
+        stmt = select(SystemConf).where(SystemConf.id == id)
+        result = await session.execute(stmt)
+        system_conf = result.scalar()
+
+    return build_json(system_conf.to_dict())
+
+
+@bp.get("/system/<id:int>")
+async def setting(request, id:int):
+    async with db.session() as session:
         stmt = select(SystemConf).where(SystemConf.id == id)
         result = await session.execute(stmt)
         system_conf = result.scalar()
