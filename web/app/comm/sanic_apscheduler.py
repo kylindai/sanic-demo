@@ -51,14 +51,15 @@ class APScheduler:
             logger.warning("no job config, using the default")
             return True
 
-        jobstore = app.config.JOB_CONFIG.get('SCHEDULER_JOBSTORE')
-        # table name: apscheduler_jobs
-        jobstores = {
-            'default': SQLAlchemyJobStore(url=f'sqlite:///{app.config.BASE_DIR}/data/{jobstore}')
-        }
         executors = {
             'default': AsyncIOExecutor()
         }
+        job_store = app.config.JOB_CONFIG.get('SCHEDULER_JOB_STORE')
+        # table name: apscheduler_jobs
+        jobstores = {
+            'default': SQLAlchemyJobStore(url=f'sqlite:///{app.config.BASE_DIR}/data/{job_store}')
+        }
+        job_defaults = app.config.JOB_CONFIG.get('SCHEDULER_JOB_DEFAULTS')
         job_defaults = {
             'coalesce': False,
             'max_instances': 3
