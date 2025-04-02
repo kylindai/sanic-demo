@@ -8,19 +8,15 @@ from sanic.log import logger
 
 from comm.conf.db_conf import Config as db_config
 
-from web.app.comm import db
+from web.app.comm import db, scheduler
 from web.app.utils import init_app
 from web.app_wss.app.bp import tester
 from web.app_wss.conf.job_conf import Config as job_config
 
 from web.app_wss.conf.job_conf import Config as job_config
 
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from web.app.comm.sanic_apscheduler import APScheduler
 
-scheduler = APScheduler()
-
-async def async_task_2():
+async def async_task_2(task_id, job_id):
     logger.debug("async_task_2 ...")
     await asyncio.sleep(1)
 
@@ -51,12 +47,5 @@ async def setup_env(app):
     # scheduler
     app.config.JOB_CONFIG = job_config
     scheduler.init_app(app)
-    # await new_scheduelr()
 
     app.blueprint(tester.bp)
-
-
-async def new_scheduelr():
-    scheduler = AsyncIOScheduler()
-    scheduler.add_job(async_task_2, 'interval', seconds=2)
-    scheduler.start()

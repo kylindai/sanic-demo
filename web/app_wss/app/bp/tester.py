@@ -18,8 +18,8 @@ from web.app_wss.app.biz.biz_model import SystemConf
 bp = Blueprint("tester", url_prefix="tester")
 
 
-async def async_task_3(task_id, job_id):
-    logger.debug("async_task_3 ...")
+async def async_task_4(task_id, job_id):
+    logger.debug("async_task_4 ...")
     await asyncio.sleep(1)
 
 
@@ -71,7 +71,7 @@ async def setting(request, id: int):
 
 @bp.get("/task")
 async def task(request):
-    job = scheduler.add_job("async_task_3", async_task_3,
+    job = scheduler.add_job("async_task_4", async_task_4,
                             args=(1, 2), trigger='interval', seconds=2)
 
     return build_json({'job': str(job)})
