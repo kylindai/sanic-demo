@@ -44,7 +44,13 @@
                         // event_stream.close();
                     }
                 });
-                
+                event_stream.addEventListener('error', (event) => {
+                    if (event_stream) {
+                        event_stream.close();
+                        event_stream = undefined;
+                        console.log("event_stream error");
+                    }
+                });
             }
         });
 
