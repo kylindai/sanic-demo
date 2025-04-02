@@ -23,11 +23,6 @@ from apscheduler.executors.asyncio import AsyncIOExecutor
 from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 
 
-async def async_task_3(task_id, job_id):
-    logger.debug("async_task_3 ...")
-    await asyncio.sleep(1)
-
-
 class APScheduler:
 
     def __init__(self):
@@ -40,23 +35,21 @@ class APScheduler:
 
     def init_app(self, app: Sanic):
         # logger.debug(app.config.JOB_CONFIG)
-        self._scheduler = AsyncIOScheduler()
         if self._load_config(app) and self._load_job(app):
             self._app = app
             app.register_listener(self._start, "after_server_start")
             app.register_listener(self._shutdown, "before_server_stop")
 
     def add_job(self, id, func, trigger, **kwargs):
-        return self._scheduler.add_job(func=func, trigger=trigger, id=id, **kwargs)
+        return self._scheduler.add_job(func, trigger, id=id, **kwargs)
 
     def remove_job(self, id, jobstore=None):
         self._scheduler.remove_job(id)
 
     def _load_config(self, app):
-        """
-        """
         if not app.config.JOB_CONFIG:
-            return False
+            logger.warning("no job config, using the default")
+            return True
 
         jobstore = app.config.JOB_CONFIG.get('SCHEDULER_JOBSTORE')
         # table name: apscheduler_jobs
