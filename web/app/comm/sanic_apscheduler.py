@@ -40,8 +40,8 @@ class APScheduler:
             app.register_listener(self._start, "after_server_start")
             app.register_listener(self._shutdown, "before_server_stop")
 
-    def add_job(self, id, func, trigger, **kwargs):
-        return self._scheduler.add_job(func, trigger, id=id, **kwargs)
+    def add_job(self, id, func, trigger, replace_existing=True, **kwargs):
+        return self._scheduler.add_job(func, trigger, id=id, replace_existing=replace_existing, **kwargs)
 
     def remove_job(self, id, jobstore=None):
         self._scheduler.remove_job(id)
@@ -92,9 +92,11 @@ class APScheduler:
         return kwargs
 
     def _start(self, app, loop):
+        # app.master
         self._scheduler.start()
         logger.info("scheduler started")
 
     def _shutdown(self, app, loop):
+        # app.master
         self._scheduler.shutdown()
         logger.info("scheduler shutdown")
