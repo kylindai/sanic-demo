@@ -40,11 +40,11 @@ class APScheduler:
             app.register_listener(self._start, "after_server_start")
             app.register_listener(self._shutdown, "before_server_stop")
 
-    def add_job(self, id, func, trigger, replace_existing=True, **kwargs):
-        return self._scheduler.add_job(func, trigger, id=id, replace_existing=replace_existing, **kwargs)
+    def add_job(self, id, func, trigger, **kwargs):
+        return self._scheduler.add_job(func, trigger, id=id, replace_existing=True, **kwargs)
 
     def remove_job(self, id, jobstore=None):
-        self._scheduler.remove_job(id)
+        self._scheduler.remove_job(id, jobstore)
 
     def _load_config(self, app):
         if not app.config.JOB_CONFIG:

@@ -27,5 +27,7 @@ async def async_task_1(task_id, conf_id):
                 logger.debug(system_conf.to_dict())
             else:
                 logger.debug("no system_conf found")
+    except asyncio.CancelledError as e:
+        logger.warning(e)
     except Exception as e:
         logger.error(e)

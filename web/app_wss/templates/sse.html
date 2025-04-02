@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>SSE Greeter</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='comm/img/icon-32x32.png') }}" type="image/x-icon" />
+</head>
+
+<body>
+    <div id="message">sse_host = {{ sse_host }}</div>
+
+    <button id="test_send" name="test_send">test_task</button>
+    <button id="start_stream" name="start_stream">start_stream</button>
+    <button id="stop_stream" name="stop_stream">stop_stream</button>
+
+    <script src="{{ url_for('static', filename='comm/js/jquery-3.7.1.min.js' )}}"></script>
+    <script type="text/javascript">
+
+        let event_stream = undefined;
+
+        $('#test_send').click((e) => {
+            $.ajax({
+                url: '/tester/task',
+                type: 'POST',
+                data: {
+                    client_id: '123'
+                },
+                dataType: 'json',
+                success: (result) => {
+                    console.log(result);
+                },
+                complete: () => { }
+            });
+        });
+
+        $('#start_stream').click((e) => {
+            if (event_stream == undefined) {
+                event_stream = new EventSource('//{{ sse_host }}/tester/stream?client_id=123');
+                let count = 0;
+                event_stream.addEventListener('greeting', (event) => {
+                    const event_data = JSON.parse(event.data);
+                    console.log(event_data);
+                    if (event_data.ts > 10) {
+                        // event_stream.close();
+                    }
+                });
+            }
+        });
+
+        $('#stop_stream').click((e) => {
+            if (event_stream) {
+                event_stream.close();
+                event_stream = undefined;
+            }
+        });
+
+    </script>
+</body>
+
+</html>

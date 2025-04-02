@@ -1,9 +1,11 @@
 import os
 import sys
 import json
+import time
 import asyncio
+import datetime
 
-from sanic import Sanic, Blueprint, Request, app
+from sanic import Sanic, Blueprint, Request, response, app
 from sanic.log import logger
 from sanic.response import text, json, html, json_dumps
 from sanic_ext import render
@@ -19,8 +21,11 @@ bp = Blueprint("tester", url_prefix="tester")
 
 
 async def async_task_4(task_id, job_id):
-    logger.debug("async_task_4 ...")
-    await asyncio.sleep(1)
+    try:
+        logger.debug(f"async_task_4 ... {task_id}, {job_id}")
+        await asyncio.sleep(1)
+    except asyncio.CancelledError as e:
+        logger.warning(e)
 
 
 @bp.get("/")
@@ -69,9 +74,37 @@ async def setting(request, id: int):
     return build_json(system_conf.to_dict())
 
 
-@bp.get("/task")
+@bp.post("/task")
 async def task(request):
-    job = scheduler.add_job("async_task_4", async_task_4,
-                            args=(1, 2), trigger='interval', seconds=2)
-
+    client_id = request.form.get('client', 0)
+    logger.debug(f'client_id = {client_id}')
+    job = scheduler.add_job("async_task_4", async_task_4, 'interval',
+                            args=(1, client_id), seconds=2)
     return build_json({'job': str(job)})
+
+
+@bp.get("/sse")
+async def sse(request):
+    return await render("sse.html", context={"sse_host": "localhost:8001"})
+
+
+@bp.get("/stream")
+async def stream(request):
+    async def event_stream(response, id):
+        try:
+            while True:
+                ts = int(time.time())
+                data = {'id': id, 'ts': ts}
+                message = f'id: {id}\nevent: greeting\ndata: {json_dumps(data)}\n\n'
+                await response.send(message)
+                await asyncio.sleep(1)
+                id = id + 1
+        except asyncio.CancelledError:
+            logger.warning('client disconnect')
+
+    response = await request.respond(content_type='text/event-stream',
+                                     headers={
+                                         'Cache-Control': 'no-cache',
+                                         'Connection': 'keep-alive'
+                                     })
+    await event_stream(response, 1)
