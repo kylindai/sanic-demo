@@ -1,3 +1,8 @@
+import os
+import sys
+import json
+import asyncio
+
 from sanic import Sanic, Blueprint, Request, app
 from sanic.log import logger
 from sanic.response import text, json, html, json_dumps
@@ -11,6 +16,11 @@ from web.app.utils import db_session, build_json
 from web.app_wss.app.biz.biz_model import SystemConf
 
 bp = Blueprint("tester", url_prefix="tester")
+
+
+async def async_task_3(task_id, job_id):
+    logger.debug("async_task_3 ...")
+    await asyncio.sleep(1)
 
 
 @bp.get("/")
@@ -40,7 +50,7 @@ async def foo(request):
 
 
 @bp.get("/setting/<id:int>")
-async def setting(request, id:int):
+async def setting(request, id: int):
     async with db_session(request) as session:
         stmt = select(SystemConf).where(SystemConf.id == id)
         result = await session.execute(stmt)
@@ -50,10 +60,18 @@ async def setting(request, id:int):
 
 
 @bp.get("/system/<id:int>")
-async def setting(request, id:int):
+async def setting(request, id: int):
     async with db.session() as session:
         stmt = select(SystemConf).where(SystemConf.id == id)
         result = await session.execute(stmt)
         system_conf = result.scalar()
 
     return build_json(system_conf.to_dict())
+
+
+@bp.get("/task")
+async def task(request):
+    job = scheduler.add_job("async_task_3", async_task_3,
+                            args=(1, 2), trigger='interval', seconds=2)
+
+    return build_json({'job': str(job)})

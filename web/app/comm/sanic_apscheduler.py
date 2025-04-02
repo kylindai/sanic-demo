@@ -25,17 +25,15 @@ class APScheduler:
     def __init__(self, scheduler=None):
         self._scheduler = scheduler or AsyncIOScheduler()
         self._app = None
-        self._app_context = ContextVar("app_context_apscheduler")
 
     @property
     def app(self) -> Sanic:
-        return self._app #_context.get()
+        return self._app  # _context.get()
 
     def init_app(self, app: Sanic):
         # logger.debug(app.config.JOB_CONFIG)
         if self._load_config(app) and self._load_job(app):
             self._app = app
-            self._app_context.set(app)
             app.register_listener(self._start, "after_server_start")
             app.register_listener(self._shutdown, "before_server_stop")
 
@@ -44,6 +42,7 @@ class APScheduler:
         job_def["id"] = id
         job_def["func"] = func
         job_def["name"] = job_def.get("name") or id
+        job_def["replace_existing"] = True
         self._fix_job_def(job_def)
 
         return self._scheduler.add_job(**job_def)
@@ -71,10 +70,10 @@ class APScheduler:
             'max_instances': 3
         }
         timezone = 'Asia/Shanghai'
-        self._scheduler.configure(  # jobstores=jobstores,
-            executors=executors,
-            job_defaults=job_defaults,
-            timezone=timezone)
+        self._scheduler.configure(executors=executors,
+                                  # jobstores=jobstores,
+                                  job_defaults=job_defaults,
+                                  timezone=timezone)
         """
         options = dict()
         # jobstores
@@ -104,9 +103,8 @@ class APScheduler:
             jobs = app.config.JOB_CONFIG.get('JOBS')
             if jobs:
                 for job in jobs:
-                    if not self._scheduler.get_job(job.get('id')):
-                        self.add_job(**job)
-            return True
+                    self.add_job(**job)
+        return True
 
     def _fix_job_def(self, job_def):
         """

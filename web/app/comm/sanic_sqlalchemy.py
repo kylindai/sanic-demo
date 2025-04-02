@@ -35,7 +35,6 @@ class SQLAlchemy:
     def __init__(self):
         self._session_ctx = None
         self._app = None
-        self._app_context = ContextVar("app_context_sqlalchemy")
 
     @property
     def app(self) -> Sanic:
@@ -46,7 +45,6 @@ class SQLAlchemy:
         db_engine = self._create_engine(app.config.DB_CONFIG)
         if db_engine:
             self._app = app
-            self._app_context.set(app)
             # register listener engine
             app.ctx.db_engine = db_engine
             app.register_listener(self._connect_db, "after_server_start")
