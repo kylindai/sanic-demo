@@ -100,10 +100,12 @@ async def stream(request):
                 await asyncio.sleep(1)
                 id = id + 1
                 logger.debug(f"event_stream send message ... {message}")
+                if id > 10:
+                    break
+            await response.eof()
         except asyncio.CancelledError:
             logger.warning('client disconnect')
             await response.eof()
-            raise
 
     response = await request.respond(content_type='text/event-stream',
                                      headers={

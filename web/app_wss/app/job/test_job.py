@@ -10,9 +10,12 @@ from web.app_wss.app.biz.biz_model import SystemConf
 
 
 def test_task_1(task_id, job_id):
-    logger.info(f"test_task_1 ... {task_id}, {job_id}")
-    logger.debug(scheduler.app.config.JOB_CONFIG['JOBS'][0])
-    gevent.sleep(1)
+    try:
+        logger.info(f"test_task_1 ... {task_id}, {job_id}")
+        logger.debug(scheduler.app.config.JOB_CONFIG['JOBS'][0])
+        gevent.sleep(1)
+    except asyncio.CancelledError as e:
+        logger.warning(e)
 
 
 async def async_task_1(task_id, conf_id):
