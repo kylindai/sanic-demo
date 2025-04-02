@@ -101,6 +101,8 @@ async def stream(request):
                 id = id + 1
         except asyncio.CancelledError:
             logger.warning('client disconnect')
+            response.close()
+            raise
 
     response = await request.respond(content_type='text/event-stream',
                                      headers={
