@@ -74,7 +74,7 @@ class APScheduler:
             jobs = app.config.JOB_CONFIG.get('JOBS')
             if jobs:
                 for job in jobs:
-                    if job['use']:
+                    if 'use' not in job or job['use']:
                         id = job['id']
                         func = job['func']
                         trigger = job['trigger']['type']
