@@ -19,3 +19,9 @@ class BaseTestCase(unittest.TestCase):
 
     def teardown_method(self, method):
         logger.info(f"after method: {method.__name__}")
+
+    @pytest.fixture(autouse=True)
+    def inject_fixtures(self, request):
+        self.request = request
+        for fixture_name in request.fixturenames:
+            setattr(self, fixture_name, request.getfixturevalue(fixture_name))
