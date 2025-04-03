@@ -73,17 +73,18 @@ class APScheduler:
         if app.config.JOB_CONFIG:
             jobs = app.config.JOB_CONFIG.get('JOBS')
             if jobs:
-                for job_def in jobs:
-                    id = job_def['id']
-                    func = job_def['func']
-                    trigger = job_def['trigger']['type']
-                    kwargs = self._job_kwargs(job_def)
-                    # logger.debug(kwargs)
-                    self.add_job(id, func, trigger, **kwargs)
+                for job in jobs:
+                    if job['use']:
+                        id = job['id']
+                        func = job['func']
+                        trigger = job['trigger']['type']
+                        kwargs = self._job_kwargs(job)
+                        # logger.debug(kwargs)
+                        self.add_job(id, func, trigger, **kwargs)
         return True
 
-    def _job_kwargs(self, job_def):
-        kwargs = copy.copy(job_def)
+    def _job_kwargs(self, job):
+        kwargs = copy.copy(job)
         kwargs.pop('id')
         kwargs.pop('func')
         trigger = kwargs.pop('trigger')

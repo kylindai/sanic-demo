@@ -31,11 +31,10 @@ async def async_task_4(task_id, job_id):
 @bp.get("/")
 async def index(request):
     # app = Sanic.get_app()
-    app = request.app
     user_name = request.ctx.session.get('user_name')
     if not user_name:
         user_name = f'miaowa@{datetime.datetime.now()}'
-        request.ctx.session['user_name'] = user_name
+        request.ctx.session.setdefault('user_name', user_name)
     return await render("index.html", context={
         "app_name": f"{app.name}",
         "user_name": user_name

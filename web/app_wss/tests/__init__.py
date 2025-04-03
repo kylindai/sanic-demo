@@ -10,7 +10,7 @@ def test_app():
     logger.debug("create app in fixture")
 
     @sanic_app.get("/")
-    def basic(request):
+    def index(request):
         return response.text("foo")
 
     return sanic_app
