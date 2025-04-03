@@ -86,6 +86,7 @@ class APScheduler:
     def _job_kwargs(self, job):
         kwargs = copy.copy(job)
         kwargs.pop('id')
+        kwargs.pop('use')
         kwargs.pop('func')
         trigger = kwargs.pop('trigger')
         trigger.pop('type')
