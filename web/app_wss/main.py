@@ -13,7 +13,7 @@ from web.app.utils import init_app
 from web.app_wss.app.bp import tester
 from web.app_wss.conf.job_conf import Config as job_config
 # from web.app_wss.conf.session_conf import Config as session_config
-from sanic_session import InMemorySessionInterface
+# from sanic_session import InMemorySessionInterface
 
 
 async def async_task_2(task_id, job_id):
@@ -49,9 +49,7 @@ async def setup_env(app):
     scheduler.init_app(app)
 
     # session
-    app.config.update({
-        'SECRET_KEY': 'miaowa'
-    })
-    session.setup(app)
+    app.config['SECRET_KEY'] = 'miaowa'
+    session.init_app(app)
 
     app.blueprint(tester.bp)

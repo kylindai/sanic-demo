@@ -30,13 +30,12 @@ async def async_task_4(task_id, job_id):
 
 @bp.get("/")
 async def index(request):
-    # app = Sanic.get_app()
-    user_name = request.ctx.session.get('user_name')
+    user_name = session.get('user_name')
     if not user_name:
         user_name = f'miaowa@{datetime.datetime.now()}'
-        request.ctx.session.setdefault('user_name', user_name)
+        session.set('user_name', user_name)
     return await render("index.html", context={
-        "app_name": f"{app.name}",
+        "app_name": f"{request.app.name}",
         "user_name": user_name
     })
 
@@ -53,7 +52,7 @@ async def user(request):
 @bp.get("/foo")
 async def foo(request):
     user_info = UserInfo("kylin")
-    user_name = await user_info.name()
+    user_name = session.get('user_name')
     logger.debug(f"{user_name} enter to foo ...")
 
     seq = ["a", "b", "c"]

@@ -1,10 +1,8 @@
 
-# from sanic_session import Session
-import sanic_cookiesession as session
-
+from .sanic_session import SanicSession
 from .sanic_sqlalchemy import SQLAlchemy
 from .sanic_apscheduler import APScheduler
 
-# session = Session()
+session = SanicSession()
 db = SQLAlchemy()
 scheduler = APScheduler()
