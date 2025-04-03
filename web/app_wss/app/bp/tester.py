@@ -13,7 +13,7 @@ from sqlalchemy import select
 
 from comm.biz import UserInfo
 
-from web.app.comm import db, scheduler
+from web.app.comm import db, scheduler, session
 from web.app.utils import db_session, build_json
 from web.app_wss.app.biz.biz_model import SystemConf
 
@@ -32,7 +32,14 @@ async def async_task_4(task_id, job_id):
 async def index(request):
     # app = Sanic.get_app()
     app = request.app
-    return await render("index.html", context={"app_name": f"{app.name}"})
+    user_name = request.ctx.session.get('user_name')
+    if not user_name:
+        user_name = f'miaowa@{datetime.datetime.now()}'
+        request.ctx.session['user_name'] = user_name
+    return await render("index.html", context={
+        "app_name": f"{app.name}",
+        "user_name": user_name
+    })
 
 
 @bp.get("/user")
@@ -113,3 +120,8 @@ async def stream(request):
                                          'Connection': 'keep-alive'
                                      })
     await event_stream(response, 1)
+
+
+@bp.get("/wss")
+async def sse(request):
+    return await render("wss.html", context={"wss_host": "localhost:8001"})

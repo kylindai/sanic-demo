@@ -8,13 +8,11 @@ from sanic.log import logger
 
 from comm.conf.db_conf import Config as db_config
 
-from web.app.comm import db, scheduler
+from web.app.comm import db, scheduler, session
 from web.app.utils import init_app
 from web.app_wss.app.bp import tester
 from web.app_wss.conf.job_conf import Config as job_config
-
-from web.app_wss.conf.job_conf import Config as job_config
-
+#from web.app_wss.conf.session_conf import Config as session_config
 
 async def async_task_2(task_id, job_id):
     logger.debug("async_task_2 ...")
@@ -47,5 +45,15 @@ async def setup_env(app):
     # scheduler
     app.config.JOB_CONFIG = job_config
     scheduler.init_app(app)
+
+    # session
+    app.config.update({
+        'SESSION_TYPE': 'filesystem',
+        'SESSION_FILE_DIR': f'{app.config.BASE_DIR}/data/sanic_session',
+        'SESSION_FILE_THRESHOLD': 1000
+    })
+    # logger.debug(app.config)
+    session.init_app(app, None)
+    # session['user_name'] = 'miaowa.pro'
 
     app.blueprint(tester.bp)
