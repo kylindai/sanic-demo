@@ -21,6 +21,7 @@
 **/tmp
 **/mod
 
+*.lock
 *.pyc
 *.log
 *.con
