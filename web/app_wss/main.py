@@ -12,8 +12,6 @@ from web.app.comm import db, scheduler, session
 from web.app.utils import init_app
 from web.app_wss.app.bp import tester
 from web.app_wss.conf.job_conf import Config as job_config
-# from web.app_wss.conf.session_conf import Config as session_config
-# from sanic_session import InMemorySessionInterface
 
 
 async def async_task_2(task_id, job_id):
@@ -53,7 +51,7 @@ async def setup_env(app):
     app.config['SESSION_NAME'] = 'mw_session'
     session.init_app(app)
 
-    # 
+    #
 
     # blueprint
     app.blueprint(tester.bp)

@@ -23,17 +23,19 @@ def init_app(app: Sanic):
 
     # init templates dir
     templates_dir = os.path.join(base_dir, "templates")
-    app.config.update({
-        "TEMPLATING_PATH_TO_TEMPLATES": templates_dir,
-        "TEMPLATING_ENABLE_ASYNC": True
+    # setup templating environment
+    # app.ext.templating.environment.autoescape = False
+    app.ext.templating.environment.trim_blocks = True
+    app.ext.templating.environment.lstrip_blocks = True
+    app.ext.templating.environment.loader.searchpath = [templates_dir]
+    app.ext.templating.environment.globals.update({
+        'e': eval,
+        'f': format_data
     })
-    app.ext.templating.environment.globals.update(e=eval,
-                                                  f=format_data)
 
-    # logger.info("----------")
-    # logger.info(dir(app.ext.templating))  # .update()
     # logger.info(app.ext.templating.config)
-    logger.info(app.ext.templating.environment.globals)
+    # logger.info(dir(app.ext.templating.environment))
+    # logger.info(app.ext.templating.environment.globals)
 
 
 def build_json(result: dict) -> JSONResponse:
