@@ -50,6 +50,10 @@ async def setup_env(app):
 
     # session
     app.config['SECRET_KEY'] = 'miaowa'
+    app.config['SESSION_NAME'] = 'mw_session'
     session.init_app(app)
 
+    # 
+
+    # blueprint
     app.blueprint(tester.bp)

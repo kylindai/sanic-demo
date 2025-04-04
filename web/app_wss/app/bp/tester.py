@@ -14,7 +14,7 @@ from sqlalchemy import select
 from comm.biz import UserInfo
 
 from web.app.comm import db, scheduler, session
-from web.app.utils import db_session, build_json
+from web.app.utils import build_json
 from web.app_wss.app.biz.biz_model import SystemConf
 
 bp = Blueprint("tester", url_prefix="tester")
@@ -34,9 +34,11 @@ async def index(request):
     if not user_name:
         user_name = f'miaowa@{datetime.datetime.now()}'
         session.set('user_name', user_name)
+    user_address = session.get('user_address')
     return await render("index.html", context={
         "app_name": f"{request.app.name}",
-        "user_name": user_name
+        "user_name": user_name,
+        "user_address": user_address
     })
 
 
