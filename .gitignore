@@ -1,11 +1,12 @@
 **/.idea
 **/.DS_Store
-**/__pycache__
 **/.ipynb_checkpoints
 **/.mypy_cache
 **/.pytest_cache/
 **/.coverage/
 **/.egg-info/
+
+**/__pycache__
 **/comm/conf
 
 **/build
