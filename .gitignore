@@ -6,12 +6,12 @@
 **/.pytest_cache/
 **/.coverage/
 **/.egg-info/
+**/comm/conf
 
 **/build
 **/dist
 **/data
 **/core
-**/conf
 **/cert
 **/venv
 **/log
