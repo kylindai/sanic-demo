@@ -27,7 +27,7 @@ def create_app() -> Sanic:
     init_app(app)
 
     app.register_listener(main_start, "main_process_start")
-    app.register_listener(setup_env, "before_server_start")
+    app.register_listener(server_setup, "before_server_start")
 
     return app
 
@@ -36,8 +36,8 @@ async def main_start(app):
     logger.debug("main_start ...")
 
 
-async def setup_env(app):
-    logger.info("setup_env ...")
+async def server_setup(app):
+    logger.info("server_setup ...")
 
     # db
     app.config.DB_CONFIG = db_config
