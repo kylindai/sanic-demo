@@ -8,10 +8,10 @@ from sanic.log import logger
 
 from comm.conf.db_conf import Config as db_config
 
-from web.app.comm import db, scheduler, session
+from web.app.comm import db, scheduler, session, login_manager
 from web.app.utils import init_app
 from web.app_wss.app.bp import tester
-from web.app_wss.conf.job_conf import Config as job_config
+from web.app_wss.conf import app_config, session_config, login_config, job_config
 
 
 async def async_task_2(task_id, job_id):
@@ -23,6 +23,7 @@ def create_app() -> Sanic:
     app = Sanic("APP_WSS")
 
     app.config.BASE_DIR = os.path.dirname(__file__)
+    app.config.update(app_config)
     init_app(app)
 
     app.register_listener(main_start, "main_process_start")
@@ -42,16 +43,17 @@ async def setup_env(app):
     app.config.DB_CONFIG = db_config
     db.init_app(app)
 
+    # session
+    app.config.SESSION_CONFIG = session_config
+    session.init_app(app)
+
+    # login_manager
+    app.config.LOGIN_CONFIG = login_config
+    login_manager.init_app(app)
+
     # scheduler
     app.config.JOB_CONFIG = job_config
     scheduler.init_app(app)
-
-    # session
-    app.config['SECRET_KEY'] = 'miaowa'
-    app.config['SESSION_NAME'] = 'mw_session'
-    session.init_app(app)
-
-    #
 
     # blueprint
     app.blueprint(tester.bp)

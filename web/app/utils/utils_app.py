@@ -3,7 +3,7 @@ import sys
 import json
 import time
 
-from sanic import Sanic
+from sanic import Sanic, Request
 from sanic.log import logger
 from sanic.response import json
 from sanic.response.types import JSONResponse
@@ -36,6 +36,10 @@ def init_app(app: Sanic):
     # logger.info(app.ext.templating.config)
     # logger.info(dir(app.ext.templating.environment))
     # logger.info(app.ext.templating.environment.globals)
+
+
+def url_for(endpoint: str, **kwargs) -> str:
+    return Request.get_current().app.url_for(endpoint, **kwargs)
 
 
 def build_json(result: dict) -> JSONResponse:

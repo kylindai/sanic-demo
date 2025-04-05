@@ -20,10 +20,12 @@ class SanicSession:
         return self._app  # _context.get()
 
     def init_app(self, app: Sanic):
-        if not self._app:
+        session_config = app.config.SESSION_CONFIG
+        if session_config:
+            app.config.update(session_config)
             cookiesession.setup(app)
             self._app = app
-            self._session_name = self._app.config['SESSION_NAME']
+            self._session_name = session_config.get('SESSION_NAME')
             # logger.debug(f'session_name = {self._session_name}')
 
     def get(self, key: str, default_value=None):
@@ -45,6 +47,8 @@ class SanicSession:
         request = Request.get_current()
         if self._app and request:
             session = getattr(request.ctx, self._session_name)
+            if not session or key not in session:
+                return None
             return session.pop(key)
 
     def clear(self):

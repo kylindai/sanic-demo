@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+
+<head>
+    <title>MiaoWa-CTP</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='miaowa/img/miaowa_32x32.png') }}" type="image/x-icon" />
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <main class="">
+        <div class="d-flex justify-content-center mt-100">
+            <div class="container">
+                <div class="row d-flex justify-content-center" style="margin-top: 100px;">
+                    <div class="col-12 col-md-8 col-lg-6">
+                        <div class="card bg-white shadow-lg">
+                            <div class="card-body p-4">
+                                <form class="mb-3 mt-md-4" action="{{ url_for('tester.user_login', next=request.args.get('next')) }}" method="post">
+                                    <h2 class="fw-bold mb-3">life.ease(more)</h2>
+                                    <div class="mb-3 mt-5">
+                                        <div class="input-group">
+                                            <span class="input-group-text text-miaowa">user</span>
+                                            <input type="text" class="form-control" name="username" value="{{ username }}"
+                                                placeholder="name" maxlength="20">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="input-group">
+                                            <span class="input-group-text text-miaowa">pass</span>
+                                            <input type="password" class="form-control" name="password" 
+                                                placeholder="*******" maxlength="20">
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-primary btn-miaowa mt-4" type="submit" style="width:100px;">Login</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer mt-auto py-1 bg-body-tertiary fixed-bottom footer-miaowa">
+        <div class="container-fluid container-miaowa text-center">
+        </div>
+    </footer>
+
+</body>

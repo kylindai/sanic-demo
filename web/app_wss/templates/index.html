@@ -9,7 +9,7 @@
 </head>
 
 <body>
-    <h1>Hello, {{ user_name }}@{{ app_name }} !</h1><br/>
+    <h1>Hello, {{ user_name }}:{{ app_name }} !</h1><br/>
     <span>{{ f(user_address) }}</span><br/>
     <span>{{ f(user_address) | safe }}</span><br/>
     {% autoescape false %}
