@@ -15,28 +15,52 @@ from contextvars import ContextVar
 
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.orm import declarative_base, relationship
-from sqlalchemy import select, func
+from sqlalchemy import Select, select, func
 
 
 class Pagination():
     """
-    - items # list
+    - page # page no
+    - size # page size
     - total # row count
     - pages # page count
-    - current_page # page no
-    - per_page # page size
+    - items # list of data
     """
 
-    def __init__(self, items: List, total: int, pages: int, current_page: int, per_page: int):
-        self.items = items
+    def __init__(self, page: int, size: int, total: int, pages: int, items: List):
+        self.page = page
+        self.size = size
         self.total = total
         self.pages = pages
-        self.current_page = current_page
-        self.per_page = per_page
+        self.items = items
+
+    @property
+    def has_prev(self) -> bool:
+        return self.page > 1
+
+    @property
+    def has_next(self) -> bool:
+        return self.page < self.pages
+
+    @property
+    def prev_page(self) -> int:
+        return 1 if not self.has_prev else self.page - 1
+
+    @property
+    def next_page(self) -> int:
+        return self.pages if not self.has_next else self.page + 1
 
     def __repr__(self) -> str:
         return str({
-            'items': self.items
+            'page': self.page,
+            'size': self.size,
+            'total': self.total,
+            'pages': self.pages,
+            'items': self.items,
+            'has_prev': self.has_prev,
+            'has_next': self.has_next,
+            'prev_page': self.prev_page,
+            'next_page': self.next_page
         })
 
 
@@ -79,23 +103,23 @@ class SQLAlchemy:
         if self._connected:
             return self._session_maker()
 
-    async def query_first(self, stmt):
+    async def query_first(self, stmt: Select):
         async with self._session_maker() as session:
             result = await session.execute(stmt)
 
         return result.scalars().first()
 
-    async def query_all(self, stmt) -> List:
+    async def query_all(self, stmt: Select) -> List:
         async with self._session_maker() as session:
             result = await session.execute(stmt)
 
         return result.scalars().all()
 
-    async def query_paginate(self, stmt, page: int = 1, per_page: int = 20) -> Dict:
+    async def query_paginate(self, stmt: Select, page: int = 1, size: int = 20) -> Dict:
         """
         - param stmt # select
         - param page # page_no from 1
-        - param per_page # page_size
+        - param size # size
         - return Paginate
         """
         async with self._session_maker() as session:
@@ -103,18 +127,16 @@ class SQLAlchemy:
             total_stmt = select(func.count()).select_from(stmt.subquery())
             total_result = await session.execute(total_stmt)
             total = total_result.scalar_one()
-
+            pages = (total + size - 1) // size
             items = []
-            total_pages = (total + per_page - 1) // per_page
-
             if total > 0:
                 # paginate
-                offset = (page - 1) * per_page
-                items_stmt = stmt.limit(per_page).offset(offset)
+                offset = (page - 1) * size
+                items_stmt = stmt.limit(size).offset(offset)
                 items_result = await session.execute(items_stmt)
                 items = items_result.scalars().all()
 
-        return Pagination(items, total, total_pages, page, per_page)
+        return Pagination(page, size, total, pages, items)
 
     def _get_db_url(self, db_config) -> str:
         if db_config and 'host' in db_config and 'port' in db_config \
