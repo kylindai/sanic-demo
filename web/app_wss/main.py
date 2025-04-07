@@ -8,7 +8,7 @@ from sanic.log import logger
 
 from comm.conf.db_conf import Config as db_config
 
-from web.app.comm import db, scheduler, session, login_manager
+from web.app.ext import db, session, static, template, login_manager, scheduler
 from web.app.utils import init_app
 from web.app_wss.app.bp import tester
 from web.app_wss.conf import app_config, session_config, login_config, job_config
@@ -47,6 +47,11 @@ async def server_setup(app):
     app.config.SESSION_CONFIG = session_config
     session.init_app(app)
 
+    # static & template
+    app.config.BASE_DIR = os.path.dirname(__file__)
+    static.init_app(app)
+    template.init_app(app)
+
     # login_manager
     app.config.LOGIN_CONFIG = login_config
     login_manager.init_app(app)
@@ -54,6 +59,7 @@ async def server_setup(app):
     # scheduler
     app.config.JOB_CONFIG = job_config
     scheduler.init_app(app)
+
 
     # blueprint
     app.blueprint(tester.bp)

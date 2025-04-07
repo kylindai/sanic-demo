@@ -7,7 +7,8 @@ import pandas as pd
 
 from datetime import datetime
 
-from comm.logger import Logger, LOG_IMPORTANT
+from comm import Logger, LOG_IMPORTANT
+from comm.utils import get_datetime
 
 
 def eval(obj_string: str):
@@ -22,9 +23,22 @@ def eval(obj_string: str):
 
 def format_data(data: object, fmt: str = None, none_value: str = '-'):
     if not data:
-        return f"<span class='text-muted'>{none_value}</span>"
-    else:
         if isinstance(data, (int, float)):
+            if fmt is not None:
+                return fmt.format(data)
+            else:
+                return data
+        else:
+            return f"<span class='text-muted'>{none_value}</span>"
+    else:
+        if isinstance(data, str):
+            if fmt is None:
+                return data
+            elif fmt == '%a' or fmt == '%A':
+                return get_datetime(data, '%Y%m%d').strftime(fmt)
+            else:
+                return data
+        elif isinstance(data, (int, float)):
             if fmt is not None:
                 if np.isnan(data):
                     return f"<span class='text-muted'>{none_value}</span>"

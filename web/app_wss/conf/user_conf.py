@@ -5,13 +5,13 @@ Config = [
     {
         'id': '1',
         'name': 'miaowa',
-        'admin': False,
+        'active': False,
         'password': generate_password_hash('123456')
     },
     {
         'id': '2',
         'name': 'admin',
-        'admin': True,
+        'active': True,
         'password': generate_password_hash('123456')
     },
 ]

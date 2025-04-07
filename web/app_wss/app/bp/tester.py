@@ -14,9 +14,9 @@ from sqlalchemy import select
 from werkzeug.security import generate_password_hash
 
 from comm.biz import UserInfo
-from web.app.comm.sanic_login import UserMixin
+from web.app.ext.sanic_login import UserMixin
 
-from web.app.comm import db, scheduler, session, login_manager
+from web.app.ext import db, scheduler, session, login_manager
 from web.app.utils import build_json
 from web.app_wss.conf import user_config
 from web.app_wss.app.biz.biz_model import SystemConf
@@ -35,15 +35,17 @@ async def async_task_4(task_id, job_id):
 class User(UserMixin):
 
     def __init__(self, user: dict):
-        self._user_id = user.get('user_id')
-        self._user_name = user.get('user_name')
-        self._user_admin = user.get('user_admin')
-        self._user_password = user.get('user_password')
+        self._id = user.get('id')
+        self._name = user.get('name')
+        self._active = user.get('active')
+        self._password = user.get('password')
 
-    @property
-    def user_id(self):
-        return self._user_id
-    
+    def get_id(self):
+        return self._id
+
+    def is_active(self):
+        return self._active
+
     @staticmethod
     def get_user_by_name(user_name: str):
         for user in user_config:
