@@ -142,10 +142,19 @@ async def setting(request, id: int):
 
 
 @bp.get("/system/<id:int>")
-async def setting(request, id: int):
+async def system(request, id: int):
     stmt = select(SystemConf).where(SystemConf.id == id)
     system_conf = await db.query_first(stmt)
     return build_json(system_conf.to_dict())
+
+
+@bp.get("/list")
+async def system_list(request):
+    session.set('user_name', 'miaowa')
+    stmt = select(SystemConf).order_by(SystemConf.id.desc())
+    page_data = await db.query_paginate(stmt)
+    logger.debug(page_data)
+    return await render("list.html", context={'page_data': page_data})
 
 
 @bp.post("/task")

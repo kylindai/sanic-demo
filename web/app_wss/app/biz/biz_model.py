@@ -15,13 +15,28 @@ class BaseModel(db.Model):
     created = db.Column(db.TIMESTAMP)
     modified = db.Column(db.TIMESTAMP)
 
+    def __repr__(self) -> str:
+        columns = self.__columns()
+        fields = ['{0}={1}'.format(c, getattr(self, c))
+                  for c in columns]
+        return "{}({})".format(self.__class__.__tablename__, ",".join(fields))
+
+    def __columns(self) -> List[str]:
+        c = ['id', 'created', 'modified']
+        keys = self._sa_class_manager.keys()
+        columns = []
+        columns.extend(c)
+        columns.extend([k for k in keys if k not in c])
+        return columns
+
     def to_dict(self) -> Dict:
         _dict = {
             'id': 0,
             'created': '',
             'modified': ''
         }
-        for k in self._sa_class_manager.keys():
+        keys = self._sa_class_manager.keys()
+        for k in keys:
             v = getattr(self, k)
             if isinstance(v, datetime.datetime):
                 v = v.strftime("%Y-%m-%d %H:%M:%S.%f")

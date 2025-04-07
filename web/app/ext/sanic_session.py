@@ -13,7 +13,6 @@ class AttrDict(dict):
     def __getattr__(self, name):
         return self.get(name, None)
 
-
 class SanicSession:
 
     def __init__(self, app: Sanic = None):
@@ -29,7 +28,7 @@ class SanicSession:
         elif name == 'ctx':
             return self._ctx
         else:
-            return self._ctx[name]
+            return self._ctx.get(name, None)
 
     @property
     def app(self) -> Sanic:
@@ -39,8 +38,8 @@ class SanicSession:
     def ctx(self) -> AttrDict:
         curr_request = Request.get_current()
         if self._app and curr_request:
-            self._ctx = AttrDict(getattr(curr_request.ctx, self._session_name))
-            return self._ctx or AttrDict({})
+            self._ctx = getattr(curr_request.ctx, self._session_name)
+            return AttrDict(self._ctx or {})
         return AttrDict({})
 
     def init_app(self, app: Sanic):

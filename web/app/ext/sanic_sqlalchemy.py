@@ -18,6 +18,28 @@ from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy import select, func
 
 
+class Pagination():
+    """
+    - items # list
+    - total # row count
+    - pages # page count
+    - current_page # page no
+    - per_page # page size
+    """
+
+    def __init__(self, items: List, total: int, pages: int, current_page: int, per_page: int):
+        self.items = items
+        self.total = total
+        self.pages = pages
+        self.current_page = current_page
+        self.per_page = per_page
+
+    def __repr__(self) -> str:
+        return str({
+            'items': self.items
+        })
+
+
 class SQLAlchemy:
 
     Column = sqlalchemy.Column
@@ -66,21 +88,15 @@ class SQLAlchemy:
     async def query_all(self, stmt) -> List:
         async with self._session_maker() as session:
             result = await session.execute(stmt)
-            
+
         return result.scalars().all()
 
     async def query_paginate(self, stmt, page: int = 1, per_page: int = 20) -> Dict:
         """
-        - param stmt
+        - param stmt # select
         - param page # page_no from 1
         - param per_page # page_size
-        - return {
-          - "items": items,       # list of model
-          - "total": total,       # total size
-          - "pages": total_pages, # total page count
-          - "current_page": page, # current page no
-          - "per_page": per_page, # page size
-          - }        
+        - return Paginate
         """
         async with self._session_maker() as session:
             # count
@@ -98,13 +114,7 @@ class SQLAlchemy:
                 items_result = await session.execute(items_stmt)
                 items = items_result.scalars().all()
 
-        return {
-            "items": items,
-            "total": total,
-            "pages": total_pages,
-            "current_page": page,
-            "per_page": per_page,
-        }
+        return Pagination(items, total, total_pages, page, per_page)
 
     def _get_db_url(self, db_config) -> str:
         if db_config and 'host' in db_config and 'port' in db_config \
