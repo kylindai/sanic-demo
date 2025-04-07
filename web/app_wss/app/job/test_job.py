@@ -5,7 +5,7 @@ from sanic import Sanic
 from sanic.log import logger
 from sqlalchemy import select
 
-from web.app.comm import db, scheduler
+from web.app.ext import db, scheduler
 from web.app_wss.app.biz.biz_model import SystemConf
 
 

@@ -5,7 +5,7 @@ import datetime
 from typing import List, Dict, Tuple
 from dataclasses import dataclass
 
-from web.app.comm import db
+from web.app.ext import db
 
 
 class BaseModel(db.Model):
