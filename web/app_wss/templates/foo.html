@@ -7,7 +7,7 @@
 </head>
 
 <body>
-    <h1>Hello, {{ user_name }}!!!</h1>
+    <h1>Hello, {{ session.user_name }}!!!</h1>
     <ul>
         {% for item in seq %}
         <li>{{ item }}</li>

@@ -121,12 +121,14 @@ async def user(request):
 @bp.get("/foo")
 async def foo(request):
     user_info = UserInfo("kylin")
-    user_name = session.get('user_name')
+    user_name = session.set('user_name', await user_info.name())
     # logger.debug(f"{user_name} enter to foo ...")
 
     seq = ["a", "b", "c"]
-    return await render("foo.html", context={
-        "seq": seq, "user_name": user_name})
+    return await render("foo.html",
+                        context={
+                            "seq": seq
+                        })
 
 
 @bp.get("/setting/<id:int>")
@@ -141,11 +143,8 @@ async def setting(request, id: int):
 
 @bp.get("/system/<id:int>")
 async def setting(request, id: int):
-    async with db.session() as session:
-        stmt = select(SystemConf).where(SystemConf.id == id)
-        result = await session.execute(stmt)
-        system_conf = result.scalar()
-
+    stmt = select(SystemConf).where(SystemConf.id == id)
+    system_conf = await db.query_first(stmt)
     return build_json(system_conf.to_dict())
 
 

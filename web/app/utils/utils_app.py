@@ -1,10 +1,10 @@
 import os
 import sys
-import json
 import time
 
 from sanic import Sanic, Request
 from sanic.log import logger
+from sanic.response import json
 from sanic.response.types import JSONResponse
 from sanic_ext import render as sanic_ext_render
 
