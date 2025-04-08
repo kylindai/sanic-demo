@@ -38,7 +38,7 @@ class SanicStatic:
             if request.path.startswith("/static/"):
                 route, handler, params = app.router.get(
                     request.path, request.method, request.host)
-                if route.name == 'static':
+                if route.name == f'{request.app.name}.static':
                     return await handler(request, **params)
             # else:
                 # logger.debug(f"static on_request: {request.path}")

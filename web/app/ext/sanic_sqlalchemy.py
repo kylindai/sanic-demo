@@ -6,7 +6,8 @@ import json
 import datetime
 import sqlalchemy
 
-from typing import Dict, List
+from typing import Dict, List, Tuple
+from collections.abc import Iterable
 
 from sanic import Sanic
 from sanic.log import logger
@@ -104,11 +105,23 @@ class SQLAlchemy:
             return self._session_maker()
 
     async def query_first(self, stmt: Select):
+        """
+        - return the first row
+          - tuple(model_1, model_2) when select(model_1, model_2)
+          - model_1 when select(model_1)
+        """
         async with self._session_maker() as session:
             result = await session.execute(stmt)
 
         if result:
-            return [tuple(row) for row in result.first()]
+            items = [tuple(row) for row in result.all()]
+            # items[0] is a tuple
+            if len(items[0]) == 1:
+                # single model
+                return items[0][0]
+            else:
+                # multi models in tuple
+                return items[0]
 
     async def query_all(self, stmt: Select) -> List:
         async with self._session_maker() as session:
@@ -132,14 +145,15 @@ class SQLAlchemy:
             total_result = await session.execute(total_stmt)
             total = total_result.scalar_one()
             pages = (total + size - 1) // size
-            items = []
+            items_result, items = None, []
             if total > 0:
                 # paginate
                 offset = (page - 1) * size
                 items_stmt = stmt.limit(size).offset(offset)
                 items_result = await session.execute(items_stmt)
-                if items_result:
-                    items = [tuple(row) for row in items_result.all()]
+
+        if items_result:
+            items = [tuple(row) for row in items_result.all()]
 
         return Pagination(page, size, total, pages, items)
 

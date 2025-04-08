@@ -4,13 +4,14 @@
 <head>
     <title>SanicDemo</title>
     <link rel="shortcut icon" href="{{ url_for('static', filename='miaowa/img/miaowa_32x32.png') }}" type="image/x-icon" />
+    <script src="{{ url_for('static', filename='comm/js/jquery-3.7.1.min.js') }}" type="text/javascript"></script>
 </head>
 
 <body>
     <h1>Hello, {{ session.user_name }} - [{{ session.current_user.name }}]!!!</h1>
     <ul>
         {% for item1, item2 in page_data.items %}
-        <li>{{ item2 }}</li>
+        <li>{{ item1.symbol }} - {{ item2.commission_open }}</li>
         {% endfor %}
     </ul>
 </body>

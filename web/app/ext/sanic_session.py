@@ -10,8 +10,8 @@ from sanic.response import file
 
 
 class AttrDict(dict):
-    def __getattr__(self, name):
-        return self.get(name, None)
+    def __getattr__(self, key):
+        return self.get(key, None)
 
 
 class SanicSession:
@@ -24,14 +24,13 @@ class SanicSession:
         if self._app:
             self.init_app(self._app)
 
-    def __getattr__(self, name):
-        if name == 'app':
+    def __getattr__(self, key):
+        if key == 'app':
             return self.app
-        elif name == 'ctx':
-            return self._ctx
+        elif key == 'ctx':
+            return self.ctx
         else:
-            if self._ctx:
-                return self._ctx.get(name, None)
+            return self.ctx.get(key, None)
 
     @property
     def app(self) -> Sanic:
@@ -41,7 +40,7 @@ class SanicSession:
     def ctx(self) -> AttrDict:
         curr_request = Request.get_current()
         if self._app and curr_request:
-            self._ctx = getattr(curr_request.ctx, self._session_name)
+            self._ctx = self._get_ctx(curr_request)
             return AttrDict(self._ctx or {})
         return AttrDict({})
 

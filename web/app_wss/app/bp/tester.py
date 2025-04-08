@@ -84,7 +84,7 @@ async def login(request):
     next = request.args.get('next')
     return await render("login.html",
                         context={
-                            "username": session.get('user_name')
+                            "username": session.get('user_name') or ''
                         })
 
 
@@ -159,12 +159,29 @@ async def system_list(request):
     session.set('user_name', 'miaowa')
     stmt = select(SystemConf).order_by(SystemConf.id.desc())
     page_data = await db.query_paginate(stmt)
-    logger.debug(page_data)
+    # logger.debug(page_data)
     return await render("list.html", context={'page_data': page_data})
 
 
+@bp.get("/symbol/query/<name:str>")
+async def system(request, name: str):
+    stmt = select(Symbol, SymbolExt) \
+        .where(Symbol.type == 'FUT',
+               Symbol.symbol == name) \
+        .join(SymbolExt, SymbolExt.symbol == Symbol.symbol) \
+        .order_by(Symbol.type.asc(),
+                  Symbol.market.asc(),
+                  Symbol.code.asc(),
+                  Symbol.term.desc())
+    symbol_info = await db.query_first(stmt)
+    return build_json({
+        'symbol': symbol_info[0].to_dict(),
+        'symbol_ext': symbol_info[1].to_dict()
+    })
+
+
 @bp.get("/symbol/join")
-async def system_list(request):
+async def symbol_join(request):
     stmt = select(Symbol, SymbolExt) \
         .where(Symbol.type == 'FUT') \
         .join(SymbolExt, SymbolExt.symbol == Symbol.symbol) \
@@ -173,7 +190,7 @@ async def system_list(request):
                   Symbol.code.asc(),
                   Symbol.term.desc())
     page_data = await db.query_paginate(stmt)
-    logger.debug(page_data)
+    # logger.debug(page_data)
     return await render("join.html", context={'page_data': page_data})
 
 
