@@ -114,23 +114,21 @@ class SQLAlchemy:
             result = await session.execute(stmt)
 
         if result:
-            items = [tuple(row) for row in result.all()]
-            # items[0] is a tuple
-            if len(items[0]) == 1:
-                # single model
-                return items[0][0]
-            else:
-                # multi models in tuple
-                return items[0]
+            for row in result.all():
+                if len(row) > 1:
+                    # multi models
+                    return row
+                else:
+                    # single model
+                    return row[0]
 
     async def query_all(self, stmt: Select) -> List:
         async with self._session_maker() as session:
             result = await session.execute(stmt)
 
         if result:
-            return [tuple(row) for row in result.all()]
-        else:
-            return []
+            return [row if len(row) > 1 else row[0] for row in result.all()]
+        return []
 
     async def query_paginate(self, stmt: Select, page: int = 1, size: int = 20) -> Dict:
         """
@@ -153,7 +151,7 @@ class SQLAlchemy:
                 items_result = await session.execute(items_stmt)
 
         if items_result:
-            items = [tuple(row) for row in items_result.all()]
+            items = [row if len(row) > 1 else row[0] for row in items_result.all()]
 
         return Pagination(page, size, total, pages, items)
 

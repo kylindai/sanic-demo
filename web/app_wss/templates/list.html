@@ -9,8 +9,8 @@
 <body>
     <h1>Hello, {{ session.user_name }} - [{{ session.current_user.name }}]!!!</h1>
     <ul>
-        {% for item in page_data.items %}
-        <li>{{ item }}</li>
+        {% for system in page_data.items %}
+        <li>{{ system.id }}</li>
         {% endfor %}
     </ul>
 </body>

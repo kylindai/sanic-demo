@@ -140,7 +140,7 @@ async def setting(request, id: int):
     if system_conf:
         return build_json(system_conf.to_dict())
     else:
-        return build_json(system_conf)
+        return json({})
 
 
 @bp.get("/system/query/<id:int>")
@@ -151,7 +151,9 @@ async def system(request, id: int):
         return build_json(system_conf.to_dict())
     else:
         system_confs = await db.query_all(select(SystemConf))
-        return build_json(system_confs)
+        return build_json({
+            'system_confs': [system_conf.to_dict() for system_conf in system_confs]
+        })
 
 
 @bp.get("/system/list")
@@ -173,11 +175,14 @@ async def system(request, name: str):
                   Symbol.market.asc(),
                   Symbol.code.asc(),
                   Symbol.term.desc())
-    symbol_info = await db.query_first(stmt)
-    return build_json({
-        'symbol': symbol_info[0].to_dict(),
-        'symbol_ext': symbol_info[1].to_dict()
-    })
+    symbol, symbol_ext = await db.query_first(stmt)
+    if symbol and symbol_ext:
+        return build_json({
+            'symbol': symbol.to_dict(),
+            'symbol_ext': symbol_ext.to_dict()
+        })
+    else:
+        return json({'result': 'error'})
 
 
 @bp.get("/symbol/join")
