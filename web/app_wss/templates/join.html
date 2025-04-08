@@ -7,13 +7,12 @@
 </head>
 
 <body>
-    <h1>Hello, {{ session.user_name }}!!!</h1>
+    <h1>Hello, {{ session.user_name }} - [{{ session.current_user.name }}]!!!</h1>
     <ul>
-        {% for item in seq %}
-        <li>{{ item }}</li>
+        {% for item1, item2 in page_data.items %}
+        <li>{{ item2 }}</li>
         {% endfor %}
     </ul>
-    <script type="text/javascript" src="{{ url_for('static', filename='miaowa/js/hello.js' )}}"></script>
 </body>
 
 </html>

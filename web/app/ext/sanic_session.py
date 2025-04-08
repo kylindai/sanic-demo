@@ -13,11 +13,13 @@ class AttrDict(dict):
     def __getattr__(self, name):
         return self.get(name, None)
 
+
 class SanicSession:
 
     def __init__(self, app: Sanic = None):
         self._app = app
         self._ctx = None
+        self._session_name = 'session'
 
         if self._app:
             self.init_app(self._app)
@@ -28,7 +30,8 @@ class SanicSession:
         elif name == 'ctx':
             return self._ctx
         else:
-            return self._ctx.get(name, None)
+            if self._ctx:
+                return self._ctx.get(name, None)
 
     @property
     def app(self) -> Sanic:
@@ -55,24 +58,28 @@ class SanicSession:
     def get(self, key: str, default_value=None, request: Request = None):
         curr_request = request or Request.get_current()
         if self._app and curr_request:
-            self._ctx = getattr(curr_request.ctx, self._session_name)
+            self._ctx = self._get_ctx(curr_request)
             return self._ctx.get(key, default_value)
 
     def set(self, key: str, value, request: Request = None):
         curr_request = request or Request.get_current()
         if self._app and curr_request:
-            self._ctx = getattr(curr_request.ctx, self._session_name)
+            self._ctx = self._get_ctx(curr_request)
             self._ctx.update({key: value})
 
     def pop(self, key: str, request: Request = None):
         curr_request = request or Request.get_current()
         if self._app and curr_request:
-            self._ctx = getattr(curr_request.ctx, self._session_name)
+            self._ctx = self._get_ctx(curr_request)
             if key in self._ctx:
                 return self._ctx.pop(key)
 
     def clear(self, request: Request = None):
         curr_request = request or Request.get_current()
         if self._app and curr_request:
-            self._ctx = getattr(curr_request.ctx, self._session_name)
+            self._ctx = self._get_ctx(curr_request)
             self._ctx.clear()
+
+    def _get_ctx(self, request):
+        ctx = getattr(request.ctx, self._session_name)
+        return ctx or {}

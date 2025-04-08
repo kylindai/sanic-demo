@@ -107,13 +107,17 @@ class SQLAlchemy:
         async with self._session_maker() as session:
             result = await session.execute(stmt)
 
-        return result.scalars().first()
+        if result:
+            return [tuple(row) for row in result.first()]
 
     async def query_all(self, stmt: Select) -> List:
         async with self._session_maker() as session:
             result = await session.execute(stmt)
 
-        return result.scalars().all()
+        if result:
+            return [tuple(row) for row in result.all()]
+        else:
+            return []
 
     async def query_paginate(self, stmt: Select, page: int = 1, size: int = 20) -> Dict:
         """
@@ -134,7 +138,8 @@ class SQLAlchemy:
                 offset = (page - 1) * size
                 items_stmt = stmt.limit(size).offset(offset)
                 items_result = await session.execute(items_stmt)
-                items = items_result.scalars().all()
+                if items_result:
+                    items = [tuple(row) for row in items_result.all()]
 
         return Pagination(page, size, total, pages, items)
 

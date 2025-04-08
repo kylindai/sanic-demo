@@ -54,3 +54,43 @@ class SystemConf(BaseModel):
     conf_key = db.Column(db.String)
     conf_value = db.Column(db.String)
     status = db.Column(db.String)
+
+
+class Symbol(BaseModel):
+    __tablename__ = 'S_SYMBOL'
+
+    id = db.Column(db.Integer, primary_key=True)
+    modified = db.Column(db.TIMESTAMP)
+    type = db.Column(db.String)
+    code = db.Column(db.String)
+    name = db.Column(db.String)
+    term = db.Column(db.String)
+    market = db.Column(db.String)
+    symbol = db.Column(db.String)
+    exchange = db.Column(db.String)
+    instrument = db.Column(db.String)
+    open_date = db.Column(db.String)
+    expire_date = db.Column(db.String)
+    is_trading = db.Column(db.Integer)
+
+
+class SymbolExt(BaseModel):
+    __tablename__ = 'S_SYMBOL_EXT'
+
+    id = db.Column(db.Integer, primary_key=True)
+    modified = db.Column(db.TIMESTAMP)
+    broker_id = db.Column(db.String)
+    user_id = db.Column(db.String)
+    symbol = db.Column(db.String)
+    price_tick = db.Column(db.Integer)
+    tick_price = db.Column(db.Float)
+    commission_open = db.Column(db.Float)
+    commission_close = db.Column(db.Float)
+    max_limit_order_volume = db.Column(db.Integer)
+    min_limit_order_volume = db.Column(db.Integer)
+    max_market_order_volume = db.Column(db.Integer)
+    min_market_order_volume = db.Column(db.Integer)
+    long_margin_ratio = db.Column(db.Float)
+    short_margin_ratio = db.Column(db.Float)
+    volume_multiple = db.Column(db.Float)
+    underlying_multiple = db.Column(db.Float)

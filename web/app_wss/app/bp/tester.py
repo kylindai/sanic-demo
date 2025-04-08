@@ -19,7 +19,7 @@ from web.app.ext.sanic_login import UserMixin
 from web.app.ext import db, scheduler, session, login_manager
 from web.app.utils import build_json
 from web.app_wss.conf import user_config
-from web.app_wss.app.biz.biz_model import SystemConf
+from web.app_wss.app.biz.biz_model import SystemConf, Symbol, SymbolExt
 
 bp = Blueprint("tester", url_prefix="tester")
 
@@ -131,30 +131,50 @@ async def foo(request):
                         })
 
 
-@bp.get("/setting/<id:int>")
+@bp.get("/system/<id:int>")
 async def setting(request, id: int):
     async with db.session() as session:
         stmt = select(SystemConf).where(SystemConf.id == id)
         result = await session.execute(stmt)
         system_conf = result.scalar()
+    if system_conf:
+        return build_json(system_conf.to_dict())
+    else:
+        return build_json(system_conf)
 
-    return build_json(system_conf.to_dict())
 
-
-@bp.get("/system/<id:int>")
+@bp.get("/system/query/<id:int>")
 async def system(request, id: int):
-    stmt = select(SystemConf).where(SystemConf.id == id)
-    system_conf = await db.query_first(stmt)
-    return build_json(system_conf.to_dict())
+    if id > 0:
+        stmt = select(SystemConf).where(SystemConf.id == id)
+        system_conf = await db.query_first(stmt)
+        return build_json(system_conf.to_dict())
+    else:
+        system_confs = await db.query_all(select(SystemConf))
+        return build_json(system_confs)
 
 
-@bp.get("/list")
+@bp.get("/system/list")
 async def system_list(request):
     session.set('user_name', 'miaowa')
     stmt = select(SystemConf).order_by(SystemConf.id.desc())
     page_data = await db.query_paginate(stmt)
     logger.debug(page_data)
     return await render("list.html", context={'page_data': page_data})
+
+
+@bp.get("/symbol/join")
+async def system_list(request):
+    stmt = select(Symbol, SymbolExt) \
+        .where(Symbol.type == 'FUT') \
+        .join(SymbolExt, SymbolExt.symbol == Symbol.symbol) \
+        .order_by(Symbol.type.asc(),
+                  Symbol.market.asc(),
+                  Symbol.code.asc(),
+                  Symbol.term.desc())
+    page_data = await db.query_paginate(stmt)
+    logger.debug(page_data)
+    return await render("join.html", context={'page_data': page_data})
 
 
 @bp.post("/task")
@@ -174,21 +194,25 @@ async def sse(request):
 
 @bp.get("/stream")
 async def stream(request):
-    async def event_stream(response, id):
+    async def stream_event(response, count):
         try:
+            id = 0
             while True:
+                id = id + 1
                 ts = int(time.time())
                 data = {'id': id, 'ts': ts}
                 message = f'id: {id}\nevent: greeting\ndata: {json_dumps(data)}\n\n'
                 await response.send(message)
                 await asyncio.sleep(1)
-                id = id + 1
                 logger.debug(f"event_stream send message ... {message}")
-                if id > 10:
+                if id > count:
                     break
             await response.eof()
         except asyncio.CancelledError:
             logger.warning('client disconnect')
+            await response.eof()
+        except Exception as e:
+            logger.error(e)
             await response.eof()
 
     response = await request.respond(content_type='text/event-stream',
@@ -196,7 +220,7 @@ async def stream(request):
                                          'Cache-Control': 'no-cache',
                                          'Connection': 'keep-alive'
                                      })
-    await event_stream(response, 1)
+    return await stream_event(response, 20)
 
 
 @bp.get("/wss")

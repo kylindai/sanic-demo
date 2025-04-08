@@ -34,15 +34,18 @@ class SanicStatic:
 
         @app.on_request(priority=99)
         async def on_request(request):
-            # skip request handlers
+            # skip other request handlers to avoid handler cookies
             if request.path.startswith("/static/"):
-                return await file(f"{base_dir}/{request.path}")
+                route, handler, params = app.router.get(
+                    request.path, request.method, request.host)
+                if route.name == 'static':
+                    return await handler(request, **params)
             # else:
                 # logger.debug(f"static on_request: {request.path}")
 
-        @app.on_response(priority=-1)
+        @app.on_response(priority=-99)
         async def on_response(request, response):
-            # skip response handlers
+            # skip other response handlers to avoid handler cookies
             if request.path.startswith("/static/"):
                 return response
             # else:
