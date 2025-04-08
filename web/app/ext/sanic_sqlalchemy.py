@@ -109,20 +109,31 @@ class SQLAlchemy:
         - return the first row
           - tuple(model_1, model_2) when select(model_1, model_2)
           - model_1 when select(model_1)
+          - None when without result
         """
         async with self._session_maker() as session:
             result = await session.execute(stmt)
 
         if result:
-            for row in result.all():
-                if len(row) > 1:
-                    # multi models
-                    return row
-                else:
-                    # single model
-                    return row[0]
+            rows = result.all()
+            if len(rows) > 0:
+                row = rows[0]
+                return row if len(row) > 1 else row[0]
+            # for row in result.all():
+            #     if len(row) > 1:
+            #         # multi models
+            #         return row
+            #     else:
+            #         # single model
+            #         return row[0]
 
     async def query_all(self, stmt: Select) -> List:
+        """
+        - return the all rows
+          - [tuple(model_1, model_2)] when select(model_1, model_2)
+          - [model_1] when select(model_1)
+          - [] when without result
+        """
         async with self._session_maker() as session:
             result = await session.execute(stmt)
 
@@ -151,6 +162,12 @@ class SQLAlchemy:
                 items_result = await session.execute(items_stmt)
 
         if items_result:
+            """
+            - items:
+            - [tuple(model_1, model_2)] when select(model_1, model_2)
+            - [model_1] when select(model_1)
+            - [] when without result
+            """
             items = [row if len(row) > 1 else row[0] for row in items_result.all()]
 
         return Pagination(page, size, total, pages, items)

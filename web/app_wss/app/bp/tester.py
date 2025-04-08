@@ -148,7 +148,10 @@ async def system(request, id: int):
     if id > 0:
         stmt = select(SystemConf).where(SystemConf.id == id)
         system_conf = await db.query_first(stmt)
-        return build_json(system_conf.to_dict())
+        if system_conf:
+            return build_json(system_conf.to_dict())
+        else:
+            return json({})
     else:
         system_confs = await db.query_all(select(SystemConf))
         return build_json({
