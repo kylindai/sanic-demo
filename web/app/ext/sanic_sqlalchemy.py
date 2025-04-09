@@ -16,7 +16,7 @@ from contextvars import ContextVar
 
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.orm import declarative_base, relationship
-from sqlalchemy import Select, select, func
+from sqlalchemy import Select, Insert, Update, Delete, select, insert, update, delete, func
 
 
 class Pagination():
@@ -112,7 +112,7 @@ class SQLAlchemy:
           - None when without result
         """
         async with self._session_maker() as session:
-            result = await session.execute(stmt)
+            result = await session.execute(stmt.limit(1))
 
         if result:
             rows = result.all()
@@ -138,10 +138,11 @@ class SQLAlchemy:
             result = await session.execute(stmt)
 
         if result:
-            return [row if len(row) > 1 else row[0] for row in result.all()]
+            return [row if len(row) > 1 else row[0]
+                    for row in result.all()]
         return []
 
-    async def query_paginate(self, stmt: Select, page: int = 1, size: int = 20) -> Dict:
+    async def query_paginate(self, stmt: Select, page: int = 1, size: int = 20) -> Pagination:
         """
         - param stmt # select
         - param page # page_no from 1
@@ -168,9 +169,20 @@ class SQLAlchemy:
             - [model_1] when select(model_1)
             - [] when without result
             """
-            items = [row if len(row) > 1 else row[0] for row in items_result.all()]
+            items = [row if len(row) > 1 else row[0]
+                     for row in items_result.all()]
 
         return Pagination(page, size, total, pages, items)
+
+    async def execute(self, stmt: Insert | Update | Delete) -> int:
+        async with self._session_maker() as session:
+            result = await session.execute(stmt)
+            await session.commit()
+
+        if isinstance(stmt, Insert):
+            return result.inserted_primary_key[0]
+        else:
+            return result.rowcount
 
     def _get_db_url(self, db_config) -> str:
         if db_config and 'host' in db_config and 'port' in db_config \
